@@ -12,6 +12,7 @@ import torch
 import tyro
 import wandb
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 
 from hw1_imitation.data import (
     Normalizer,
@@ -20,7 +21,7 @@ from hw1_imitation.data import (
     load_pusht_zarr,
 )
 from hw1_imitation.model import build_policy, PolicyType
-from hw1_imitation.evaluation import Logger
+from hw1_imitation.evaluation import evaluate_policy, Logger
 
 LOGDIR_PREFIX = "exp"
 
@@ -128,6 +129,61 @@ def run_training(config: TrainConfig) -> None:
     logger = Logger(log_dir)
 
     ### TODO: PUT YOUR MAIN TRAINING LOOP HERE ###
+
+    step = 0
+    optimizer = torch.optim.AdamW(model.parameters(), lr=config.lr)
+    for epoch in range(config.num_epochs):
+        
+        # Set model to training mode
+        model.train()
+        running_loss = 0.0
+
+        # Wrap the loader with tqdm for a dynamic progress bar
+        pbar = tqdm(
+            loader, 
+            desc=f"Epoch [{epoch + 1}/{config.num_epochs}]", 
+            leave=False
+        )
+
+        for batch_idx, (inputs, targets) in enumerate(pbar):
+            #print("inputs ", inputs.shape)
+            #print("targets ", targets.shape)
+
+            # Move data to target device (GPU/CPU)
+            inputs, targets = inputs.to(device), targets.to(device)
+            
+            # --- THE 5 STEPS OF TRAINING ---
+            # Step 1: Zero gradients from previous iteration
+            optimizer.zero_grad()
+            
+            # Step 2: Compute loss
+            loss = model.compute_loss(inputs, targets)
+            
+            # Step 3: Backward pass (compute gradients)
+            loss.backward()
+            
+            # Step 4: Update model weights
+            optimizer.step()
+            
+            # Accumulate metrics
+            running_loss += loss.item()
+
+            # Eval
+            step += 1
+            if step % config.eval_interval == 0:
+                evaluate_policy(model=model,
+                    normalizer=normalizer,
+                    device=device,
+                    chunk_size=config.chunk_size,
+                    video_size=config.video_size,
+                    num_video_episodes=config.num_video_episodes,
+                    flow_num_steps=config.flow_num_steps,
+                    step=step,
+                    logger=logger,
+                )
+        
+    epoch_loss = running_loss / len(loader)
+    print(f"Epoch [{epoch + 1}/{config.num_epochs}] - Loss: {epoch_loss:.4f}")
 
     logger.dump_for_grading()
 
