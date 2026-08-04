@@ -146,8 +146,6 @@ def run_training(config: TrainConfig) -> None:
         )
 
         for batch_idx, (inputs, targets) in enumerate(pbar):
-            #print("inputs ", inputs.shape)
-            #print("targets ", targets.shape)
 
             # Move data to target device (GPU/CPU)
             inputs, targets = inputs.to(device), targets.to(device)
@@ -166,10 +164,14 @@ def run_training(config: TrainConfig) -> None:
             optimizer.step()
             
             # Accumulate metrics
-            running_loss += loss.item()
+            loss_val = loss.item()
+            running_loss += loss_val
+            step += 1
+
+            wandb.log({"train/loss": loss_val, "global_step": step})
+            pbar.set_postfix({"loss": f"{loss_val:.4f}"})
 
             # Eval
-            step += 1
             if step % config.eval_interval == 0:
                 evaluate_policy(model=model,
                     normalizer=normalizer,
@@ -181,9 +183,11 @@ def run_training(config: TrainConfig) -> None:
                     step=step,
                     logger=logger,
                 )
+                model.train()
         
-    epoch_loss = running_loss / len(loader)
-    print(f"Epoch [{epoch + 1}/{config.num_epochs}] - Loss: {epoch_loss:.4f}")
+        epoch_loss = running_loss / len(loader)
+        wandb.log({"train/epoch_loss": epoch_loss, "epoch": epoch + 1})
+        print(f"Epoch [{epoch + 1}/{config.num_epochs}] - Loss: {epoch_loss:.4f}")
 
     logger.dump_for_grading()
 
