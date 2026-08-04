@@ -168,7 +168,7 @@ def run_training(config: TrainConfig) -> None:
             running_loss += loss_val
             step += 1
 
-            wandb.log({"train/loss": loss_val, "global_step": step})
+            wandb.log({"train/loss": loss_val,}, step=step)
             pbar.set_postfix({"loss": f"{loss_val:.4f}"})
 
             # Eval
@@ -186,7 +186,7 @@ def run_training(config: TrainConfig) -> None:
                 model.train()
         
         epoch_loss = running_loss / len(loader)
-        wandb.log({"train/epoch_loss": epoch_loss, "epoch": epoch + 1})
+        wandb.log({"train/epoch_loss": epoch_loss, "epoch": epoch + 1}, step=step)
         print(f"Epoch [{epoch + 1}/{config.num_epochs}] - Loss: {epoch_loss:.4f}")
 
     logger.dump_for_grading()
