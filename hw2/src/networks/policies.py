@@ -28,7 +28,6 @@ class MLPPolicy(nn.Module):
         learning_rate: float,
     ):
         super().__init__()
-
         if discrete:
             self.logits_net = ptu.build_mlp(
                 input_size=ob_dim,
@@ -116,7 +115,8 @@ class MLPPolicyPG(MLPPolicy):
         # TODO: compute the policy gradient actor loss
         dist = self.forward(obs) 
         log_prob = dist.log_prob(actions) # [B]
-        assert self.discrete
+        if not self.discrete:
+            log_prob = torch.sum(log_prob, axis=-1)
         loss = -(log_prob * advantages).mean()
 
         # TODO: perform an optimizer step

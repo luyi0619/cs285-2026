@@ -87,8 +87,9 @@ class PGAgent(nn.Module):
         if self.critic is not None:
             # TODO: perform `self.baseline_gradient_steps` updates to the critic/baseline network
             critic_info = None
-
-            info.update(critic_info)
+            for i in range(self.baseline_gradient_steps):
+                critic_info = self.critic.update(obs, q_values)
+                info.update(critic_info)
 
         return info
 
@@ -160,12 +161,12 @@ class PGAgent(nn.Module):
             advantages = q_values
         else:
             # TODO: run the critic and use it as a baseline
-            values = None
+            values = ptu.to_numpy(self.critic(ptu.from_numpy(obs)))
             assert values.shape == q_values.shape
 
             if self.gae_lambda is None:
                 # TODO: if using a baseline, but not GAE, what are the advantages?
-                advantages = None
+                advantages = q_values - values
             else:
                 # TODO: implement GAE
                 batch_size = obs.shape[0]
@@ -185,6 +186,8 @@ class PGAgent(nn.Module):
 
         # TODO: normalize the advantages to have a mean of zero and a standard deviation of one within the batch
         if self.normalize_advantages:
-            pass
+            u = np.mean(advantages)
+            std = np.std(advantages)
+            advantages = (advantages - u) / (std + 1e-8)
 
         return advantages
