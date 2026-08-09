@@ -1,0 +1,84 @@
+_wandb:
+    value:
+        cli_version: 0.23.1
+        e:
+            gk6q36xw82nsutkv783hwdxvlx7yswi8:
+                args:
+                    - --exp_name
+                    - flow
+                    - --policy_type=flow
+                codePath: hw1/src/hw1_imitation/train.py
+                codePathLocal: src/hw1_imitation/train.py
+                cpu_count: 4
+                cpu_count_logical: 8
+                disk:
+                    /:
+                        total: "103865303040"
+                        used: "33715171328"
+                email: luyi0619@gmail.com
+                executable: /home/yilu/cs285-2026/hw1/.venv/bin/python3
+                git:
+                    commit: cc004b87655861c0259913e79788e45a4e3a4c26
+                    remote: git@github.com:luyi0619/cs285-2026.git
+                host: cs285-cpu
+                memory:
+                    total: "33651974144"
+                os: Linux-6.8.0-1065-gcp-x86_64-with-glibc2.35
+                program: /home/yilu/cs285-2026/hw1/src/hw1_imitation/train.py
+                python: CPython 3.11.15
+                root: /home/yilu/cs285-2026/hw1
+                startedAt: "2026-08-09T18:32:39.281420Z"
+                writerId: gk6q36xw82nsutkv783hwdxvlx7yswi8
+        m: []
+        python_version: 3.11.15
+        t:
+            "1":
+                - 1
+            "2":
+                - 1
+            "3":
+                - 2
+                - 13
+                - 16
+                - 61
+            "4": 3.11.15
+            "5": 0.23.1
+            "12": 0.23.1
+            "13": linux-x86_64
+batch_size:
+    value: 128
+chunk_size:
+    value: 8
+data_dir:
+    value: data
+eval_interval:
+    value: 10000
+exp_name:
+    value: flow
+flow_num_steps:
+    value: 10
+hidden_dims:
+    value:
+        - 256
+        - 256
+        - 256
+log_interval:
+    value: 100
+lr:
+    value: 0.0003
+num_epochs:
+    value: 400
+num_video_episodes:
+    value: 5
+policy_type:
+    value: flow
+seed:
+    value: 42
+video_size:
+    value:
+        - 256
+        - 256
+wandb_project:
+    value: hw1-imitation
+weight_decay:
+    value: 0

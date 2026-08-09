@@ -1,0 +1,32 @@
+{
+  "os":  "Linux-6.8.0-1065-gcp-x86_64-with-glibc2.35",
+  "python":  "CPython 3.11.15",
+  "startedAt":  "2026-08-09T18:19:08.288929Z",
+  "args":  [
+    "--exp_name",
+    "mse"
+  ],
+  "program":  "/home/yilu/cs285-2026/hw1/src/hw1_imitation/train.py",
+  "codePath":  "hw1/src/hw1_imitation/train.py",
+  "codePathLocal":  "src/hw1_imitation/train.py",
+  "git":  {
+    "remote":  "git@github.com:luyi0619/cs285-2026.git",
+    "commit":  "cc004b87655861c0259913e79788e45a4e3a4c26"
+  },
+  "email":  "luyi0619@gmail.com",
+  "root":  "/home/yilu/cs285-2026/hw1",
+  "host":  "cs285-cpu",
+  "executable":  "/home/yilu/cs285-2026/hw1/.venv/bin/python3",
+  "cpu_count":  4,
+  "cpu_count_logical":  8,
+  "disk":  {
+    "/":  {
+      "total":  "103865303040",
+      "used":  "33602539520"
+    }
+  },
+  "memory":  {
+    "total":  "33651974144"
+  },
+  "writerId":  "l2py809f68nqazufoaiqkqfmrqb7r44v"
+}

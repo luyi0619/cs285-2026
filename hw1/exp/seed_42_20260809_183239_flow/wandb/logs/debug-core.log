@@ -1,0 +1,8 @@
+{"time":"2026-08-09T18:32:39.379546879Z","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmp9oqyemkw/port-4855.txt","pid":4855,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false,"enable-dcgm-profiling":false}
+{"time":"2026-08-09T18:32:39.380198492Z","level":"INFO","msg":"server: will exit if parent process dies","ppid":4855}
+{"time":"2026-08-09T18:32:39.380199916Z","level":"INFO","msg":"server: accepting connections","addr":{"Name":"/tmp/wandb-4855-4923-240923956/socket","Net":"unix"}}
+{"time":"2026-08-09T18:32:39.565438993Z","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"1(@)"}
+{"time":"2026-08-09T18:32:39.573312771Z","level":"INFO","msg":"handleInformInit: received","streamId":"vn65i9ka","id":"1(@)"}
+{"time":"2026-08-09T18:32:40.011509316Z","level":"INFO","msg":"handleInformInit: stream started","streamId":"vn65i9ka","id":"1(@)"}
+{"time":"2026-08-09T18:46:53.139955521Z","level":"INFO","msg":"handleInformFinish: finish message received","streamId":"vn65i9ka","id":"1(@)"}
+{"time":"2026-08-09T18:46:53.142511815Z","level":"INFO","msg":"handleInformFinish: stream closed","streamId":"vn65i9ka","id":"1(@)"}

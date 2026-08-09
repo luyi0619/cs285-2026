@@ -1,0 +1,8 @@
+{"time":"2026-08-09T18:19:08.376510349Z","level":"INFO","msg":"main: starting server","port-filename":"/tmp/tmphw7wefeb/port-2392.txt","pid":2392,"log-level":0,"disable-analytics":false,"shutdown-on-parent-exit":false,"enable-dcgm-profiling":false}
+{"time":"2026-08-09T18:19:08.377032888Z","level":"INFO","msg":"server: will exit if parent process dies","ppid":2392}
+{"time":"2026-08-09T18:19:08.377022343Z","level":"INFO","msg":"server: accepting connections","addr":{"Name":"/tmp/wandb-2392-2460-904776699/socket","Net":"unix"}}
+{"time":"2026-08-09T18:19:08.563864972Z","level":"INFO","msg":"connection: ManageConnectionData: new connection created","id":"1(@)"}
+{"time":"2026-08-09T18:19:08.570675104Z","level":"INFO","msg":"handleInformInit: received","streamId":"fjys1t22","id":"1(@)"}
+{"time":"2026-08-09T18:19:09.007547281Z","level":"INFO","msg":"handleInformInit: stream started","streamId":"fjys1t22","id":"1(@)"}
+{"time":"2026-08-09T18:30:58.868833488Z","level":"INFO","msg":"handleInformFinish: finish message received","streamId":"fjys1t22","id":"1(@)"}
+{"time":"2026-08-09T18:30:58.870969437Z","level":"INFO","msg":"handleInformFinish: stream closed","streamId":"fjys1t22","id":"1(@)"}
