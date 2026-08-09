@@ -43,7 +43,22 @@ def compute_per_token_logprobs(
     #
     # Respect enable_grad: when enable_grad=False this function should not build an
     # autograd graph.
-    raise NotImplementedError("student TODO: compute_per_token_logprobs")
+
+    context = torch.enable_grad() if enable_grad else torch.no_grad()
+    with context:
+        # [B, L, V]
+        out = model(input_ids=input_ids, attention_mask=attention_mask, use_cache=False)
+        logits = out.logits
+        B, L, V = logits.shape
+        # [B, L-1, V] -> [B * (L-1), V]
+        logits = logits[:, :-1, :].reshape(-1, V)
+        # [B, L-1] -> [B * (L-1)]
+        targets = input_ids[:, 1:].reshape(-1)
+        nll = F.cross_entropy(logits, targets, reduction='none')
+        # [B * (L-1)] -> [B, L-1]
+        log_probs = -nll.reshape(B, L - 1)
+
+    return log_probs
 
 
 def build_completion_mask(
