@@ -12,8 +12,9 @@ dependencies = [
   "modal>=1.0.0",
 ]
 
-[project.optional-dependencies]
-remote = [
+# Use dependency-groups (uv sync includes 'dev' automatically)
+[dependency-groups]
+dev = [
   "torch>=2.5,<2.7",
   "transformers>=4.45.0,<4.57.0",
   "peft>=0.13.0",
