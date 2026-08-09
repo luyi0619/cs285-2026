@@ -70,7 +70,7 @@ class MLPPolicy(nn.Module):
         dist = self.forward(obs_tensor)
         action_tensor = dist.sample()
 
-        action = ptu.to_numpy(action_tensor).squeeze(0)
+        action = ptu.to_numpy(action_tensor)[0]
         return action
 
     def forward(self, obs: torch.FloatTensor):
@@ -111,6 +111,9 @@ class MLPPolicyPG(MLPPolicy):
 
         if self.discrete:
             actions = actions.long()
+        else:
+            if actions.ndim == 1:
+                actions = actions.unsqueeze(-1)
 
         # TODO: compute the policy gradient actor loss
         dist = self.forward(obs) 
