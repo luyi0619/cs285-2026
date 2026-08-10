@@ -84,7 +84,10 @@ def build_completion_mask(
     B, L = input_ids.shape
     assert (B, L) == attention_mask.shape
 
-    raise NotImplementedError("student TODO: build_completion_mask")
+    mask = torch.zeros((B, L - 1), dtype=torch.float32, device=input_ids.device)
+    mask[:, :] = attention_mask[:, 1:] # [B, L - 1]
+    mask[:, :prompt_input_len - 1] = 0
+    return mask
 
 
 def masked_sum(x: torch.Tensor, mask: torch.Tensor, eps: float = 1e-8) -> torch.Tensor:
