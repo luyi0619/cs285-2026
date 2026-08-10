@@ -62,8 +62,8 @@ def compute_per_token_logprobs(
 
 
 def build_completion_mask(
-    input_ids: torch.Tensor,
-    attention_mask: torch.Tensor,
+    input_ids: torch.Tensor, # [B, L]
+    attention_mask: torch.Tensor, # [B, L]
     prompt_input_len: int,
     pad_token_id: int,
 ) -> torch.Tensor:
@@ -81,6 +81,9 @@ def build_completion_mask(
     # prompt_input_len is the (padded) prompt length before completion tokens were
     # appended. You can use attention_mask to exclude padding; pad_token_id is passed
     # for convenience but a direct attention-mask-based solution is fine.
+    B, L = input_ids.shape
+    assert (B, L) == attention_mask.shape
+
     raise NotImplementedError("student TODO: build_completion_mask")
 
 
@@ -97,9 +100,9 @@ def masked_mean_per_row(x: torch.Tensor, mask: torch.Tensor, eps: float = 1e-8) 
 
 
 def approx_kl_from_logprobs(
-    new_logprobs: torch.Tensor,
-    ref_logprobs: torch.Tensor,
-    mask: torch.Tensor,
+    new_logprobs: torch.Tensor, # [B, L -1]
+    ref_logprobs: torch.Tensor, # [B, L -1]
+    mask: torch.Tensor, # [B, L -1]
     eps: float = 1e-8,
     log_ratio_clip: float = 20.0,
 ) -> torch.Tensor:
@@ -125,4 +128,11 @@ def approx_kl_from_logprobs(
     #                             = KL(p_new || p_ref).
     #
     # The clamp to [-20, 20] is for numerical stability / variance control.
-    raise NotImplementedError("student TODO: approx_kl_from_logprobs")
+
+    delta = torch.clamp(
+        ref_logprobs - new_logprobs, 
+        min=-log_ratio_clip, 
+        max=log_ratio_clip,
+    ) # [B, L - 1]
+    per_token = torch.exp(delta) - delta - 1 # [B, L - 1]
+    return torch.sum(per_token * mask, axis=-1) / (torch.sum(mask, axis = -1) + eps)
