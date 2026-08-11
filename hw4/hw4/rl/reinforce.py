@@ -91,8 +91,11 @@ class Reinforce(RLAlgorithm):
             mask_sum = torch.sum(mask, axis=-1, keepdim=True)
             # [B, 1]
             seq_logp = torch.sum(new_logp * mask, axis=-1, keepdim=True) / (mask_sum + 1e-8)
-
             pg_loss = -torch.mean(adv[:, None] * seq_logp)
+            # or we can do
+            # seq_logp = masked_mean_per_row(new_logp, mask)  # Returns [B_mb]
+            # pg_loss = -torch.mean(adv * seq_logp)           # [B_mb] * [B_mb]
+
             kl = approx_kl_from_logprobs(
                 new_logp,
                 mb.ref_logprobs,
