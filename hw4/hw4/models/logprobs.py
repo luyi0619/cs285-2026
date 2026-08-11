@@ -138,4 +138,4 @@ def approx_kl_from_logprobs(
         max=log_ratio_clip,
     ) # [B, L - 1]
     per_token = torch.exp(delta) - delta - 1 # [B, L - 1]
-    return torch.sum(per_token * mask, axis=-1) / (torch.sum(mask, axis = -1) + eps)
+    return masked_mean(per_token, mask)
