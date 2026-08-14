@@ -79,11 +79,12 @@ class DQNAgent(nn.Module):
 
             if self.use_double_q:
                 # TODO(Section 2.5): implement double-Q target action selection
-                next_action = None
+                next_online_qa_values = self.critic.forward(next_obs)
+                next_action = torch.argmax(next_online_qa_values, dim=-1, keepdim=True)
+                next_q_values = torch.gather(next_qa_values, dim=-1, index=next_action).squeeze(-1)
             else:
-                next_action = action
+                next_q_values = torch.max(next_qa_values, axis = -1).values
 
-            next_q_values = torch.max(next_qa_values, axis = -1).values
             assert next_q_values.shape == (batch_size,), next_q_values.shape
 
             target_values = reward + self.discount * (1 - done.float()) * next_q_values
