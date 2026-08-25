@@ -1,5 +1,6 @@
 from typing import Callable, Optional, Sequence, Tuple
 import copy
+import math
 
 import torch
 from torch import nn
@@ -89,9 +90,13 @@ class SoftActorCritic(nn.Module):
         if self.auto_tune_temperature:
             # TODO(Section 3.5): Initialize log_alpha, alpha_optimizer, and target_entropy
             # Hint: Initialize log_alpha to log(temperature) so alpha starts at the given temperature
-            self.log_alpha = None
-            self.alpha_optimizer = None
-            self.target_entropy = None
+            self.log_alpha = nn.Parameter(
+                torch.tensor(math.log(temperature), dtype=torch.float32)
+            )
+            self.alpha_optimizer = torch.optim.Adam(
+                [self.log_alpha], lr=alpha_learning_rate
+            )
+            self.target_entropy = -float(action_dim)
             # ENDTODO
 
         self.critic_loss = nn.MSELoss()
@@ -105,7 +110,7 @@ class SoftActorCritic(nn.Module):
         if self.auto_tune_temperature:
             # TODO(Section 3.5): Return the current learned temperature
             # skip here until we implement the temperature tuning
-            return None
+            return self.log_alpha.exp().item()
             # ENDTODO
         else:
             return self.temperature
@@ -280,10 +285,13 @@ class SoftActorCritic(nn.Module):
 
         # TODO(Section 3.4): Compute the actor loss (replace the placeholder below)
         # loss = torch.tensor(0.0, device=obs.device) # replace this with the correct loss
-        loss = -(q_values + self.get_temperature() * log_prob).mean()
+        loss = -q_values.mean()
         # ENDTODO
 
-        return loss, torch.mean(self.entropy(action_distribution)), log_prob
+        # Fix Entropy.
+        entropy = -log_prob.mean()
+
+        return loss, entropy, log_prob
 
     def update_actor(self, obs: torch.Tensor):
         """
@@ -324,8 +332,8 @@ class SoftActorCritic(nn.Module):
             return {}
 
         # TODO(Section 3.5): Implement dual gradient descent for temperature tuning
-        alpha = None
-        alpha_loss = None
+        alpha = self.log_alpha.exp()
+        alpha_loss = -alpha * (log_prob + self.target_entropy).mean()
 
         self.alpha_optimizer.zero_grad()
         alpha_loss.backward()
@@ -380,7 +388,7 @@ class SoftActorCritic(nn.Module):
 
         # Update alpha (temperature) using dual gradient descent (Section 3.5)
         if self.auto_tune_temperature:
-            alpha_info = self.update_alpha(actor_info["log_prob"])
+            alpha_info = self.update_alpha(actor_info["log_prob"].detach())
         else:
             alpha_info = {}
 
@@ -389,10 +397,10 @@ class SoftActorCritic(nn.Module):
         #  - step
         #  - self.target_update_period (None when using soft updates)
         #  - self.soft_target_update_rate (None when using hard updates)
-        if self.target_update_period and step % self.target_update_period == 0:
-            self.update_target_critic()
-        else:
-            assert self.soft_target_update_rate 
+        if self.target_update_period:
+            if step > 0 and step % self.target_update_period == 0:
+                self.update_target_critic()
+        elif self.soft_target_update_rate is not None:
             self.soft_update_target_critic(self.soft_target_update_rate)
         # ENDTODO
 
