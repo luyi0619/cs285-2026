@@ -168,7 +168,7 @@ class SoftActorCritic(nn.Module):
         if self.target_critic_backup_type == "mean":
             next_qs = next_qs.mean(dim=0)
         elif self.target_critic_backup_type == "min":
-            next_qs = None
+            next_qs = next_qs.min(dim=0).values
         else:
             raise ValueError(
                 f"Invalid critic backup strategy {self.target_critic_backup_type}"
@@ -203,14 +203,14 @@ class SoftActorCritic(nn.Module):
         with torch.no_grad():
             # TODO(Section 3.2): Sample from the actor and compute next Q-values
             next_action_distribution = self.actor(next_obs)
-            next_action = next_action_distribution.sample()
+            next_action = next_action_distribution.rsample()
             next_qs = self.target_critic(next_obs, next_action)
             # ENDTODO
 
             if self.use_entropy_bonus and self.backup_entropy:
                 # TODO(Section 3.3): Add entropy bonus to the target values for SAC
-                next_action_entropy = self.entropy(next_action_distribution)
-                next_qs += self.get_temperature() * next_action_entropy
+                next_log_prob = next_action_distribution.log_prob(next_action)
+                next_qs -= self.get_temperature() * next_log_prob
                 # Hint: next_qs = ...
                 # ENDTODO
 
@@ -285,7 +285,8 @@ class SoftActorCritic(nn.Module):
 
         # TODO(Section 3.4): Compute the actor loss (replace the placeholder below)
         # loss = torch.tensor(0.0, device=obs.device) # replace this with the correct loss
-        loss = -q_values.mean()
+        min_q = q_values.min(dim=0).values  # Shape: (batch_size,)
+        loss = -min_q.mean()  # Scalar
         # ENDTODO
 
         # Fix Entropy.
@@ -300,7 +301,8 @@ class SoftActorCritic(nn.Module):
         loss, entropy, log_prob = self.actor_loss_reparametrize(obs)
 
         # TODO(Section 3.3): Add the entropy bonus to the actor loss: loss -= [your entropy bonus here]
-        loss -= self.get_temperature() * entropy
+        if self.use_entropy_bonus:
+            loss -= self.get_temperature() * entropy
         # ENDTODO
 
         self.actor_optimizer.zero_grad()
