@@ -210,7 +210,7 @@ class SoftActorCritic(nn.Module):
             if self.use_entropy_bonus and self.backup_entropy:
                 # TODO(Section 3.3): Add entropy bonus to the target values for SAC
                 next_log_prob = next_action_distribution.log_prob(next_action)
-                next_qs -= self.get_temperature() * next_log_prob
+                next_qs += self.get_temperature() * next_log_prob
                 # Hint: next_qs = ...
                 # ENDTODO
 
@@ -286,7 +286,12 @@ class SoftActorCritic(nn.Module):
         # TODO(Section 3.4): Compute the actor loss (replace the placeholder below)
         # loss = torch.tensor(0.0, device=obs.device) # replace this with the correct loss
         min_q = q_values.min(dim=0).values  # Shape: (batch_size,)
-        loss = -min_q.mean()  # Scalar
+        if self.use_entropy_bonus:
+            # Standard SAC: minimize (alpha * log_prob - Q)
+            loss = (self.get_temperature() * log_prob - min_q).mean()
+        else:
+            # Standard DDPG style: minimize (-Q)
+            loss = -min_q.mean()
         # ENDTODO
 
         # Fix Entropy.
