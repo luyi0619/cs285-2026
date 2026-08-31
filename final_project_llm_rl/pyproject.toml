@@ -10,10 +10,6 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "modal>=1.0.0",
-]
-
-[project.optional-dependencies]
-remote = [
   "torch>=2.5,<2.7",
   "transformers>=4.45.0,<4.57.0",
   "peft>=0.13.0",
@@ -22,6 +18,9 @@ remote = [
   "wandb>=0.16.0",
   "numpy<2.0",
 ]
+
+[project.optional-dependencies]
+remote = []
 
 [tool.setuptools.packages.find]
 include = ["llm_rl_final_proj*"]

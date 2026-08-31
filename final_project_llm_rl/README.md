@@ -104,6 +104,24 @@ Online:
 - `gspo`
 
 ## Typical Training Commands
+### Local GPU training
+From the `final_project_llm_rl` directory, install the local dependencies and run the
+same training arguments used by the Modal entrypoints:
+
+```bash
+uv sync --extra remote
+uv run python scripts/train.py \
+  --algo dpo \
+  --model_name Qwen/Qwen2.5-1.5B-Instruct \
+  --dataset_name ./dataset/wildchat_min4_judged_5k_v1 \
+  --output_dir ./runs/local_dpo \
+  --no-wandb_enabled
+```
+
+Use `reward_model` or `rm_grpo` immediately after `scripts/train.py` to run those
+trainers locally. CUDA is required by default; pass `REQUIRE_CUDA=0` only when
+intentionally running a CPU smoke test.
+
 ### Reward model
 ```bash
 uv run modal run scripts/modal_train.py::reward_model_train_remote -- \
