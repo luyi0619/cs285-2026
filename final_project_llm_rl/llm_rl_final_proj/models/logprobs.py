@@ -74,4 +74,4 @@ def approx_kl_from_logprobs(
     # You should mask out non-completion positions and return a scalar batch mean.
     delta = torch.clamp(ref_logprobs - new_logprobs , min=-log_ratio_clip, max=log_ratio_clip) # [B, L-1]
     estimator = torch.exp(delta) - delta - 1 # [B, L-1]
-    return masked_mean(estimator, mask, eps) # [B]
+    return masked_mean(estimator, mask, eps)
