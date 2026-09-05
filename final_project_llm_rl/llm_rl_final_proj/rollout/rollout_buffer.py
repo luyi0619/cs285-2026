@@ -45,8 +45,11 @@ def iter_minibatches(
     batch_device = batch.input_ids.device
 
     if shuffle:
-        g = generator or torch.default_generator
-        all_indices = torch.randperm(N, generator=g).to(batch_device)
+        if generator is not None:
+            gen_device = generator.device
+            all_indices = torch.randperm(N, generator=generator, device=gen_device).to(batch_device)
+        else:
+            all_indices = torch.randperm(N, generator=torch.default_generator, device="cpu").to(batch_device)
     else:
         all_indices = torch.arange(N, device=batch_device)
 

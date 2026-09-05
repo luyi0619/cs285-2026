@@ -42,7 +42,7 @@ def build_completion_mask(
     # TODO(student): build a float mask of shape [B, L-1] that selects only completion tokens.
     # Be careful about the one-token shift between logits[:, :-1] and input_ids[:, 1:].
     B, L = input_ids.shape
-    positions = torch.arrange(L, device=input_ids.device).unsqueeze(0).expand(B, L) # [B, L]
+    positions = torch.arange(L, device=input_ids.device).unsqueeze(0).expand(B, L) # [B, L]
     mask = (positions >= prompt_input_len) & attention_mask
     return mask[:, 1:].float() # [B, L-1]
 
