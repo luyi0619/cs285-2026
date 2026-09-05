@@ -203,17 +203,24 @@ def _sample_prompt_batch(examples: Sequence[GenerationExample], batch_size: int,
 
 
 def _compute_group_advantages(
-    rewards: torch.Tensor,
+    rewards: torch.Tensor, # [B]
     group_size: int,
     eps: float = 1e-6,
     *,
     divide_by_std: bool,
 ) -> torch.Tensor:
-    del eps
+    assert rewards.shape[0] % group_size == 0
+    r = rewards.reshape(-1, group_size)  # [B//G, G]
+    mu = r.mean(dim=-1, keepdim=True)  # [B//G, 1]
+    if divide_by_std:
+        std = r.std(dim=-1, keepdim=True, unbiased=False)  # [B//G, 1]
+        adv = (r - mu) / (std + eps)
+    else:
+        adv = r - mu
     # TODO(student): compute one scalar advantage per sampled completion by grouping rewards
     # into prompt-wise batches of size `group_size`, subtracting the group mean, and optionally
     # dividing by the group standard deviation when `divide_by_std=True`.
-    raise NotImplementedError("Implement _compute_group_advantages in the student starter.")
+    return adv.reshape(-1)  # [B]
 
 
 def _build_online_algo(cfg: OnlineRMGRPOConfig):
@@ -239,8 +246,9 @@ def _build_online_algo(cfg: OnlineRMGRPOConfig):
 def _algo_divides_advantages_by_std(algo: str) -> bool:
     # TODO(student): return True for the algorithms that use group-standard-deviation
     # normalization and False for the algorithms that intentionally avoid it.
-    raise NotImplementedError("Implement _algo_divides_advantages_by_std in the student starter.")
-
+    if algo == 'grpo':
+        return True
+    return False
 
 def _normalize_completion_for_reward_scoring(text: str) -> str:
     if text.strip():
