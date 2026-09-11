@@ -54,18 +54,20 @@ class SACBCAgent(nn.Module):
     @torch.compile
     def update_q(
         self,
-        observations: torch.Tensor,
-        actions: torch.Tensor,
-        rewards: torch.Tensor,
-        next_observations: torch.Tensor,
-        dones: torch.Tensor,
+        observations: torch.Tensor, # [B, O]
+        actions: torch.Tensor, # [B, A]
+        rewards: torch.Tensor, # [B]
+        next_observations: torch.Tensor, # [B, O]
+        dones: torch.Tensor, # [B]
     ) -> dict:
         """
         Update Q(s, a)
         """
         # TODO(student): Compute the Q loss
-        q = ...
-        loss = ...
+        with torch.no_grad():
+            next_actions = self.actor(next_observations).rsample()
+            q = rewards + (1-dones) * self.discount * self.target_critic(next_observations, next_actions).mean(dim=0)
+        loss = ((self.critic(observations, actions) - q[None, :]) ** 2).mean()
 
         self.critic_optimizer.zero_grad()
         loss.backward()
@@ -81,19 +83,24 @@ class SACBCAgent(nn.Module):
     @torch.compile
     def update_actor(
         self,
-        observations: torch.Tensor,
-        actions: torch.Tensor,
+        observations: torch.Tensor, # [B, O]
+        actions: torch.Tensor, # [B, A]
     ):
         """
         Update the actor
         """
         # TODO(student): Compute the actor loss
-        q_loss = ...
 
-        mses = ...
-        bc_loss = ...
+        # [B, A]
+        dist = self.actor(observations)
+        policy_actions = dist.rsample()
 
-        entropy_loss = ...
+        q_loss = -self.critic(observations, policy_actions).mean() 
+
+        mses = ((policy_actions - actions) ** 2).mean(dim=1)
+        bc_loss = (self.alpha  * mses).mean()
+
+        entropy_loss = self.beta().detach() * dist.log_prob(policy_actions).mean()
 
         loss = q_loss + bc_loss + entropy_loss
 
@@ -156,4 +163,14 @@ class SACBCAgent(nn.Module):
 
     def update_target_critic(self) -> None:
         # TODO(student): Update target_critic using Polyak averaging with self.target_update_rate
-        ...
+        # 1. Get state dictionaries
+        with torch.no_grad():
+            # target <- target + tau * (critic - target) 
+            #        <- (1 - tau) * target + tau * critic
+
+            for target_param, critic_param in zip(
+                self.target_critic.parameters(),
+                self.critic.parameters(),
+            ):
+                target_param.mul_(1 - self.target_update_rate)
+                target_param.add_(self.target_update_rate * critic_param)
