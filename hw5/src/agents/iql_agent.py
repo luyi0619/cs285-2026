@@ -123,7 +123,7 @@ class IQLAgent(nn.Module):
             "q_min": q.min(),
         }
 
-    #@torch.compile
+    @torch.compile
     def update_actor(
         self,
         observations: torch.Tensor,
